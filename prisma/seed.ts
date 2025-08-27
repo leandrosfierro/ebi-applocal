@@ -1,0 +1,1 @@
+console.log('Seed demo: agregá más datos en prisma/seed.ts')

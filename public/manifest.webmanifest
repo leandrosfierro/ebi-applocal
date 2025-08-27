@@ -1,0 +1,13 @@
+{
+  "name": "EBI",
+  "short_name": "EBI",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
