@@ -1,0 +1,116 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id           Int           @id @default(autoincrement())
+  name         String
+  logoUrl      String?
+  settingsJson Json?
+  users        User[]
+  campaigns    Campaign[]
+}
+
+model User {
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  role         String
+  orgId        Int?
+  profileJson  Json?
+  org          Organization?  @relation(fields: [orgId], references: [id])
+  responses    Response[]
+  invitations  Invitation[]   // <-- back relation for Invitation.user
+}
+
+model Campaign {
+  id                   Int           @id @default(autoincrement())
+  orgId                Int
+  name                 String
+  startAt              DateTime?
+  endAt                DateTime?
+  anonymous            Boolean       @default(true)
+  questionnaireVersion String?
+  settingsJson         Json?
+  org                  Organization  @relation(fields: [orgId], references: [id])
+  invitations          Invitation[]
+  responses            Response[]
+  reports              Report[]      // <-- back relation for Report.campaign
+}
+
+model Invitation {
+  id         Int       @id @default(autoincrement())
+  campaignId Int
+  userId     Int?
+  token      String    @unique
+  status     String    @default("pending")
+  campaign   Campaign  @relation(fields: [campaignId], references: [id])
+  user       User?     @relation(fields: [userId], references: [id])
+}
+
+model Question {
+  id        Int               @id @default(autoincrement())
+  domain    String
+  text      String
+  inverse   Boolean           @default(false)
+  required  Boolean           @default(true)
+  metaJson  Json?
+  options   QuestionOption[]
+  answers   Answer[]
+}
+
+model QuestionOption {
+  id         Int      @id @default(autoincrement())
+  questionId Int
+  label      String
+  value      Int
+  question   Question @relation(fields: [questionId], references: [id])
+}
+
+model Response {
+  id           Int        @id @default(autoincrement())
+  campaignId   Int
+  respondentId Int?
+  anonToken    String?
+  submittedAt  DateTime?
+  ibiValue     Float?
+  scoresJson   Json?
+  campaign     Campaign   @relation(fields: [campaignId], references: [id])
+  respondent   User?      @relation(fields: [respondentId], references: [id])
+  answers      Answer[]
+  reports      Report[]
+}
+
+model Answer {
+  id         Int      @id @default(autoincrement())
+  responseId Int
+  questionId Int
+  value      Int?
+  rawJson    Json?
+  response   Response @relation(fields: [responseId], references: [id])
+  question   Question @relation(fields: [questionId], references: [id])
+}
+
+model Recommendation {
+  id            Int    @id @default(autoincrement())
+  domain        String
+  band          String
+  text          String
+  resourcesJson Json?
+}
+
+model Report {
+  id         Int       @id @default(autoincrement())
+  responseId Int?
+  campaignId Int?
+  url        String
+  type       String
+  createdAt  DateTime  @default(now())
+  response   Response? @relation(fields: [responseId], references: [id])
+  campaign   Campaign? @relation(fields: [campaignId], references: [id])
+}
