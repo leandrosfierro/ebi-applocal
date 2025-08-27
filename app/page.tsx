@@ -1,2 +1,0 @@
-'use client'
-export default function Page(){return <div className='p-8'>EBI listo para instalar dependencias. (El componente completo está en la versión ampliada que te pasé arriba, si lo querés lo vuelvo a incluir)</div>}
